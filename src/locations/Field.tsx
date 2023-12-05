@@ -59,7 +59,7 @@ const Field = () => {
     models[sdk.ids.contentType]?.patterns?.[defaultLocale];
 
   const parts = pattern
-    ?.split(/((?<!field):|\/|-)/)
+    ?.split("/")
     ?.map((part: string) => part.replace(/(\[|\])/gi, "").trim());
 
   const fields: string[] = [];
