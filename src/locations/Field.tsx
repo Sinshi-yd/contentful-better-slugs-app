@@ -17,6 +17,7 @@ const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
   const debounceInterval: any = useRef(false);
+  const uriDebounceInterval: any = useRef(false);
   const detachExternalChangeHandler: any = useRef(null);
   const isLoaded: any = useRef(false);
   const [value, setValue] = useState<string | undefined>(
@@ -122,6 +123,11 @@ const Field = () => {
         clearInterval(debounceInterval.current);
       }
 
+      // Remove uri debounce interval
+      if (uriDebounceInterval.current) {
+        clearInterval(uriDebounceInterval.current);
+      }
+
       // Remove external change listener
       if (detachExternalChangeHandler.current) {
         detachExternalChangeHandler.current();
@@ -134,9 +140,32 @@ const Field = () => {
     };
   }, []);
 
+  const updatePageDefintion = async () => {
+    const pageDefinitionRef = sdk.entry.fields["pageDefinition"].getValue(
+      sdk.field.locale
+    );
+    const pageDefinition = await cma.entry.get({
+      entryId: pageDefinitionRef.sys.id,
+    });
+
+    pageDefinition.fields["slug"] = { "en-US": sdk.field.getValue() };
+
+    await cma.entry.update(
+      { entryId: pageDefinitionRef.sys.id },
+      pageDefinition
+    );
+  };
+
   const onExternalChange = (value: string) => {
+    console.log("changed");
     if (isLoaded.current) {
       setValue(value);
+      if (uriDebounceInterval.current) {
+        clearInterval(uriDebounceInterval.current);
+      }
+      uriDebounceInterval.current = setTimeout(() => {
+        updatePageDefintion();
+      }, 500);
     }
   };
 
