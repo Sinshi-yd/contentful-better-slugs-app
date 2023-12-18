@@ -287,6 +287,7 @@ const Field = () => {
 
     sdk.entry.fields[sdk.field.id].setValue(
       slugParts
+        .filter((part) => part)
         .join("/")
         .replace(/\/\//g, "/")
         .replace(/\/$/, "")
